@@ -81,7 +81,7 @@ type GetBlockByNumberResponse struct {
 }
 
 func GetBlockByNumber(blockNumber int) (model.Block, error) {
-	blockNumberInHex := fmt.Sprintf("%x", blockNumber)
+	blockNumberInHex := fmt.Sprintf("0x%x", blockNumber)
 	params := []interface{}{blockNumberInHex, true}
 	resp := GetBlockByNumberResponse{}
 	err := BlockchainHttpPost("eth_getBlockByNumber", params, &resp)
