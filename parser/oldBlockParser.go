@@ -6,45 +6,45 @@ import (
 	"evm-blockchain-parser/lib/slice"
 	"evm-blockchain-parser/model"
 	"log"
-	"strconv"
 	"sync"
 	"time"
 )
 
 type OldBlockParser struct {
-	BlockParser
-	cronjob.CronJob
+	BlockParser BlockParser
+	Cronjob     cronjob.CronJob
 }
 
-func (obp OldBlockParser) Run(interval int) {
-	defer time.Sleep(time.Duration(interval) * time.Millisecond)
+func (obp OldBlockParser) Run() {
+	defer time.Sleep(time.Duration(obp.Cronjob.Interval) * time.Millisecond)
 
 	if len(model.AddressMap) == 0 {
-		log.Printf("[OldBlockParser] no address added, skip worker")
+		// log.Printf("[OldBlockParser] no address added, skip worker")
 		return
 	}
 
-	latestScannedBlockNum, err := strconv.Atoi(model.LatestScannedBlock.Number)
-	if err != nil {
-
-	}
 	latestBlockNum, _ := http.GetLatestBlockNumber()
 
 	addressLastBlockList := make([]int, 0, 1000)
 	addressLastBlockMap := map[string]int{}
 	for address, addressInfo := range model.AddressMap {
-		if addressInfo.LastBlock == latestScannedBlockNum {
+		if addressInfo.LastBlock == int(latestBlockNum)-1 {
 			continue
 		}
 		addressLastBlockList = append(addressLastBlockList, addressInfo.LastBlock)
 		addressLastBlockMap[address] = addressInfo.LastBlock
 	}
-	earliestBlockNum := slice.MinInt(addressLastBlockList)
+	var earliestBlockNum int
+	if len(addressLastBlockList) == 0 {
+		earliestBlockNum = 0
+	} else {
+		earliestBlockNum = slice.MinInt(addressLastBlockList)
+	}
 
 	jobMap := map[int]*[]string{}
 	blockRange := int(latestBlockNum) - earliestBlockNum
-	if blockRange > obp.jobCapacity {
-		blockRange = obp.jobCapacity
+	if blockRange > obp.BlockParser.JobCapacity {
+		blockRange = obp.BlockParser.JobCapacity
 	}
 	for address, lastBlockNum := range addressLastBlockMap {
 		for i := 1; i <= blockRange; i++ {
@@ -67,11 +67,11 @@ func (obp OldBlockParser) Run(interval int) {
 			if err != nil {
 				//add retry job
 				log.Printf("[GetBlockByNumber] failed with err: [%s], for block: %v, skip this cronjob", err.Error(), blockNumber)
-				AddRetryJob(blockNumber, addressList)
+				AddRetryJob(blockNumber, addressList, obp.BlockParser.Mu)
 				return
 			}
-			obp.ScanTransactionInBlock(block, addressList)
-			model.UpdateLastBlock(int(blockNumber), addressList)
+			obp.BlockParser.ScanTransactionInBlock(block, addressList)
+			model.UpdateLastBlock(int64(blockNumber), addressList, obp.BlockParser.Mu)
 		}(&wg, blockNumber, *addressList)
 	}
 	wg.Wait()

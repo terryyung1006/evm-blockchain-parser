@@ -2,7 +2,7 @@ package model
 
 import (
 	"evm-blockchain-parser/lib/slice"
-	"log"
+	"sync"
 )
 
 type Transaction struct {
@@ -22,13 +22,15 @@ type Transaction struct {
 	S                string `json:"s"`
 }
 
-var TransactionHashMap map[string]Transaction
+var TransactionHashMap = map[string]Transaction{}
 
-func AddTransaction(transaction Transaction) {
+func AddTransaction(transaction Transaction, mu *sync.Mutex) {
 	existingHashList := slice.GetSliceOfKeys(TransactionHashMap)
 	if slice.Contains(existingHashList, transaction.Hash) {
-		log.Fatalf("[AddTransaction]transaction: %s already exists", transaction.Hash)
+		// log.Fatalf("[AddTransaction]transaction: %s already exists", transaction.Hash)
 		return
 	}
+	mu.Lock()
+	defer mu.Unlock()
 	TransactionHashMap[transaction.Hash] = transaction
 }
