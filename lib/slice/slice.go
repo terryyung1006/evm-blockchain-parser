@@ -1,5 +1,7 @@
 package slice
 
+import "strings"
+
 func Contains[T comparable](s []T, e T) bool {
 	for _, v := range s {
 		if v == e {
@@ -26,4 +28,13 @@ func MinInt(array []int) int {
 		}
 	}
 	return min
+}
+
+func StringSliceEqualFoldContainCheck(strList []string, str string) bool {
+	for _, val := range strList {
+		if strings.EqualFold(val, str) {
+			return true
+		}
+	}
+	return false
 }
