@@ -8,6 +8,8 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strconv"
+
+	"github.com/gin-gonic/gin"
 )
 
 func HttpPost(url string, body interface{}, result interface{}) error {
@@ -87,4 +89,18 @@ func GetBlockByNumber(blockNumber int) (model.Block, error) {
 		return model.Block{}, fmt.Errorf("[GetBlockByNumber] failed with err: %s", err.Error())
 	}
 	return resp.Result, nil
+}
+
+func ResponseJson(ctx *gin.Context, data interface{}, err error) {
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"code":    http.StatusBadRequest,
+			"message": err.Error(),
+		})
+	} else {
+		ctx.JSON(http.StatusOK, gin.H{
+			"code": http.StatusOK,
+			"data": data,
+		})
+	}
 }
