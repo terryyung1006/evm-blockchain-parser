@@ -8,6 +8,8 @@ import (
 	"io/ioutil"
 	"net/http"
 	"strconv"
+	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -26,8 +28,13 @@ func HttpPost(url string, body interface{}, result interface{}) error {
 	if err != nil {
 		return fmt.Errorf("[HttpPost] ioutil ReadAll resp body failed with error: %s", err.Error())
 	}
-	err = json.Unmarshal(respBody, result)
+	err = json.Unmarshal([]byte(respBody), result)
 	if err != nil {
+		if strings.Contains(string(respBody), "Rate limiting threshold exceeded") {
+			defer time.Sleep(time.Duration(3) * time.Second)
+			return fmt.Errorf("[HttpPost] Rate limiting threshold exceeded")
+
+		}
 		return fmt.Errorf("[HttpPost] response unmarshal failed with error: %s", err.Error())
 	}
 	return nil
