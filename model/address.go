@@ -7,6 +7,7 @@ import (
 	"sync"
 )
 
+// memory storage for subcribed addresses and transaction hash
 type AddressInfo struct {
 	LastBlock  int
 	TxHashList []string

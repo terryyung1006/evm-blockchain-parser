@@ -1,5 +1,6 @@
 package model
 
+// memory storage for block
 type Block struct {
 	Difficulty       string        `json:"difficulty"`
 	ExtraData        string        `json:"extraData"`

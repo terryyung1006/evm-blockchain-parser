@@ -5,6 +5,7 @@ import (
 	"sync"
 )
 
+// memory storage for transaction
 type Transaction struct {
 	BlockHash        string `json:"blockHAsh"`
 	BlockNumber      string `json:"blockNumber"`

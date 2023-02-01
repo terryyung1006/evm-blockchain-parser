@@ -25,6 +25,7 @@ func (obp OldBlockParser) Run() {
 
 	latestBlockNum, _ := http.GetLatestBlockNumber()
 
+	//get the smllest block and addresses list of this cronjob
 	addressLastBlockList := make([]int, 0, 1000)
 	addressLastBlockMap := map[string]int{}
 	for address, addressInfo := range model.AddressMap {
@@ -41,6 +42,7 @@ func (obp OldBlockParser) Run() {
 		earliestBlockNum = slice.MinInt(addressLastBlockList)
 	}
 
+	//create job map for processing
 	jobMap := map[int]*[]string{}
 	blockRange := int(latestBlockNum) - earliestBlockNum
 	if blockRange > obp.BlockParser.JobCapacity {
@@ -58,6 +60,7 @@ func (obp OldBlockParser) Run() {
 		}
 	}
 
+	//get matched transaction and save in memory storage
 	var wg sync.WaitGroup
 	for blockNumber, addressList := range jobMap {
 		wg.Add(1)

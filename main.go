@@ -12,6 +12,8 @@ import (
 )
 
 func main() {
+	//not much tx can be found in the beginning of chain,
+	//block scanning will start with this value
 	model.StartFromBlockNum = 600000 - 1
 
 	var mu sync.Mutex
