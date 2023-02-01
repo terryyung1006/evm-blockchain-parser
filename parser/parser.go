@@ -3,10 +3,12 @@ package parser
 import (
 	"evm-blockchain-parser/lib/slice"
 	"evm-blockchain-parser/model"
+	"sync"
 )
 
 type BlockParser struct {
-	jobCapacity int
+	JobCapacity int
+	Mu          *sync.Mutex
 }
 
 func (bp BlockParser) ScanTransactionInBlock(block model.Block, addressList []string) {
@@ -19,8 +21,8 @@ func (bp BlockParser) ScanTransactionInBlock(block model.Block, addressList []st
 			matchedAddress = transaction.To
 		}
 		if matchedAddress != "" {
-			model.AddTransaction(transaction)
-			model.AddTransactionHash(matchedAddress, transaction.Hash)
+			model.AddTransaction(transaction, bp.Mu)
+			model.AddTransactionHash(matchedAddress, transaction.Hash, bp.Mu)
 		}
 	}
 }
