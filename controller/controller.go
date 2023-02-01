@@ -9,7 +9,7 @@ import (
 )
 
 func GetCurrentBlock(ctx *gin.Context) {
-	http.ResponseJson(ctx, model.LatestScannedBlock.Number, nil)
+	http.ResponseJson(ctx, model.LatestScannedBlock, nil)
 }
 
 func Subcribe(ctx *gin.Context) {

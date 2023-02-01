@@ -22,4 +22,6 @@ type Block struct {
 	Uncles           []string      `json:"uncles"`
 }
 
-var LatestScannedBlock Block
+var LatestScannedBlock int64
+
+var StartFromBlockNum int
