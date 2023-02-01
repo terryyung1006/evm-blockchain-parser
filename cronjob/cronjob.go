@@ -8,8 +8,12 @@ type CronJob struct {
 	Interval int
 }
 
-func (cjg CronjobGroup) RunCronJobs() {
-	for i := 0; i < len(cjg); i++ {
-		go cjg[i].Run(10)
+func RunCronJobs(cronJobs []Icronjob) {
+	for i := 0; i < len(cronJobs); i++ {
+		go func(cronJob Icronjob) {
+			for {
+				cronJob.Run()
+			}
+		}(cronJobs[i])
 	}
 }
